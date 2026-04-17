@@ -9,12 +9,10 @@ const Achats = () => {
   const { products, purchases, expenses, addPurchase, addExpense } = useStore();
   const [tab, setTab] = useState<"achats" | "depenses">("achats");
 
-  // Achat form
   const [pid, setPid] = useState(products[0]?.id || "");
   const [pqty, setPqty] = useState(1);
   const [pcost, setPcost] = useState(0);
 
-  // Dépense form
   const [type, setType] = useState("Électricité");
   const [amount, setAmount] = useState(0);
   const [desc, setDesc] = useState("");
@@ -35,16 +33,20 @@ const Achats = () => {
 
   return (
     <AppShell>
-      <PageHeader title="Achats & Dépenses" />
+      <PageHeader title="Achats & Dépenses" subtitle="Gérez vos approvisionnements" />
 
-      <div className="mb-4 flex rounded-2xl bg-secondary p-1">
+      <div className="relative mb-4 flex rounded-2xl bg-secondary p-1 ring-1 ring-border/50">
         {([
           { v: "achats", l: "Achats", icon: ShoppingBasket },
           { v: "depenses", l: "Dépenses", icon: Zap },
         ] as const).map(({ v, l, icon: Icon }) => (
           <button key={v} onClick={() => setTab(v)}
-            className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2 text-sm font-semibold transition ${tab === v ? "bg-card text-foreground shadow-soft" : "text-muted-foreground"}`}>
-            <Icon size={14} /> {l}
+            className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold transition-colors ${tab === v ? "text-primary-foreground" : "text-muted-foreground"}`}>
+            {tab === v && (
+              <motion.div layoutId="tabPill" className="absolute inset-0 rounded-xl gradient-mesh shadow-glow"
+                transition={{ type: "spring", stiffness: 380, damping: 30 }} />
+            )}
+            <span className="relative z-10 flex items-center gap-1.5"><Icon size={14} /> {l}</span>
           </button>
         ))}
       </div>
@@ -52,7 +54,7 @@ const Achats = () => {
       {tab === "achats" ? (
         <>
           <Card>
-            <h3 className="mb-3 text-sm font-bold">Nouvel achat</h3>
+            <h3 className="mb-3 text-sm font-extrabold tracking-tight" style={{ fontFamily: "Sora, sans-serif" }}>Nouvel achat</h3>
             <Field label="Produit">
               <select value={pid} onChange={(e) => setPid(e.target.value)} className="input">
                 {products.map((p) => <option key={p.id} value={p.id}>{p.emoji} {p.name}</option>)}
@@ -62,24 +64,28 @@ const Achats = () => {
               <Field label="Quantité"><input type="number" min={1} value={pqty} onChange={(e) => setPqty(+e.target.value)} className="input" /></Field>
               <Field label="Coût unitaire"><input type="number" min={0} value={pcost || ""} onChange={(e) => setPcost(+e.target.value)} className="input" /></Field>
             </div>
-            <div className="mt-3 flex items-center justify-between rounded-xl bg-accent/50 px-3 py-2 text-sm">
-              <span className="text-muted-foreground">Total</span>
-              <span className="font-bold text-primary">{formatBIF(pqty * pcost)}</span>
-            </div>
-            <Button onClick={submitPurchase}><Plus size={14} /> Ajouter l'achat</Button>
+            <motion.div
+              key={pqty * pcost}
+              initial={{ scale: 0.95 }} animate={{ scale: 1 }}
+              className="mt-3 flex items-center justify-between rounded-2xl bg-accent px-4 py-3"
+            >
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total</span>
+              <span className="text-lg font-extrabold gradient-text" style={{ fontFamily: "Sora, sans-serif" }}>{formatBIF(pqty * pcost)}</span>
+            </motion.div>
+            <Button onClick={submitPurchase}><Plus size={14} strokeWidth={3} /> Ajouter l'achat</Button>
           </Card>
 
-          <h3 className="mt-6 mb-2 text-sm font-bold">Historique</h3>
+          <h3 className="mt-6 mb-3 px-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Historique</h3>
           <div className="space-y-2">
             {purchases.length === 0 && <Empty label="Aucun achat enregistré" />}
             {purchases.map((p, i) => (
               <Row key={p.id} delay={i * 0.04}>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-lg">📦</div>
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent text-lg">📦</div>
                 <div className="flex-1 min-w-0">
-                  <p className="truncate text-sm font-semibold">{p.productName}</p>
+                  <p className="truncate text-sm font-bold">{p.productName}</p>
                   <p className="text-xs text-muted-foreground">{p.qty} × {formatBIF(p.unitCost)}</p>
                 </div>
-                <p className="text-sm font-bold text-warning">-{formatBIF(p.total)}</p>
+                <p className="text-sm font-extrabold text-warning tabular-nums">-{formatBIF(p.total)}</p>
               </Row>
             ))}
           </div>
@@ -87,56 +93,57 @@ const Achats = () => {
       ) : (
         <>
           <Card>
-            <h3 className="mb-3 text-sm font-bold">Nouvelle dépense</h3>
+            <h3 className="mb-3 text-sm font-extrabold tracking-tight" style={{ fontFamily: "Sora, sans-serif" }}>Nouvelle dépense</h3>
             <Field label="Type">
               <div className="flex flex-wrap gap-1.5">
                 {types.map((t) => (
                   <button key={t} onClick={() => setType(t)}
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${type === t ? "gradient-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>{t}</button>
+                    className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${type === t ? "gradient-mesh text-primary-foreground shadow-glow" : "bg-secondary text-muted-foreground"}`}>{t}</button>
                 ))}
               </div>
             </Field>
             <div className="mt-3"><Field label="Montant (BIF)"><input type="number" min={0} value={amount || ""} onChange={(e) => setAmount(+e.target.value)} className="input" /></Field></div>
             <div className="mt-3"><Field label="Description"><input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Optionnel" className="input" /></Field></div>
-            <Button onClick={submitExpense}><Plus size={14} /> Ajouter la dépense</Button>
+            <Button onClick={submitExpense}><Plus size={14} strokeWidth={3} /> Ajouter la dépense</Button>
           </Card>
 
-          <h3 className="mt-6 mb-2 text-sm font-bold">Historique</h3>
+          <h3 className="mt-6 mb-3 px-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">Historique</h3>
           <div className="space-y-2">
             {expenses.length === 0 && <Empty label="Aucune dépense" />}
             {expenses.map((e, i) => (
               <Row key={e.id} delay={i * 0.04}>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-warning/15 text-warning"><Zap size={16} /></div>
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-warning/15 text-warning"><Zap size={18} /></div>
                 <div className="flex-1 min-w-0">
-                  <p className="truncate text-sm font-semibold">{e.type}</p>
+                  <p className="truncate text-sm font-bold">{e.type}</p>
                   {e.description && <p className="truncate text-xs text-muted-foreground">{e.description}</p>}
                 </div>
-                <p className="text-sm font-bold text-warning">-{formatBIF(e.amount)}</p>
+                <p className="text-sm font-extrabold text-warning tabular-nums">-{formatBIF(e.amount)}</p>
               </Row>
             ))}
           </div>
         </>
       )}
 
-      <style>{`.input{width:100%;border-radius:0.75rem;border:1px solid hsl(var(--border));background:hsl(var(--background));padding:0.625rem 0.75rem;font-size:0.875rem;outline:none}.input:focus{border-color:hsl(var(--primary))}`}</style>
+      <style>{`.input{width:100%;border-radius:0.875rem;border:1px solid hsl(var(--border));background:hsl(var(--background));padding:0.75rem 0.875rem;font-size:0.875rem;outline:none;transition:all 0.2s}.input:focus{border-color:hsl(var(--primary));box-shadow:0 0 0 3px hsl(var(--primary) / 0.15)}`}</style>
     </AppShell>
   );
 };
 
-const Card = ({ children }: any) => <div className="rounded-2xl bg-card p-4 shadow-soft">{children}</div>;
+const Card = ({ children }: any) => <div className="rounded-3xl gradient-card p-5 shadow-soft ring-1 ring-border/50">{children}</div>;
 const Field = ({ label, children }: any) => (
-  <label className="block"><span className="mb-1 block text-xs font-medium text-muted-foreground">{label}</span>{children}</label>
+  <label className="block"><span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>{children}</label>
 );
 const Button = ({ children, onClick }: any) => (
   <motion.button whileTap={{ scale: 0.97 }} onClick={onClick}
-    className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-2xl gradient-primary py-3 text-sm font-bold text-primary-foreground shadow-glow">
+    className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-2xl gradient-mesh py-3.5 text-sm font-extrabold tracking-tight text-primary-foreground shadow-glow transition hover:shadow-pop">
     {children}
   </motion.button>
 );
 const Row = ({ children, delay }: any) => (
-  <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay }}
-    className="flex items-center gap-3 rounded-2xl bg-card p-3 shadow-soft">{children}</motion.div>
+  <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay, type: "spring", stiffness: 280, damping: 22 }}
+    whileHover={{ x: 3 }}
+    className="flex items-center gap-3 rounded-2xl gradient-card p-3.5 shadow-soft ring-1 ring-border/50 transition hover:shadow-elegant">{children}</motion.div>
 );
-const Empty = ({ label }: any) => <p className="rounded-2xl bg-card p-6 text-center text-sm text-muted-foreground shadow-soft">{label}</p>;
+const Empty = ({ label }: any) => <p className="rounded-2xl gradient-card p-6 text-center text-sm text-muted-foreground shadow-soft ring-1 ring-border/50">{label}</p>;
 
 export default Achats;
