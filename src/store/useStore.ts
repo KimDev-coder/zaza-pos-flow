@@ -77,6 +77,8 @@ interface State {
   updateUser: (u: Partial<AppUser>) => void;
   updateUserPermissions: (id: string, perms: Permission[]) => void;
   updateUserRole: (id: string, role: Role) => void;
+  loginAs: (id: string) => void;
+  changePassword: (currentPwd: string, newPwd: string) => boolean;
 }
 
 const today = () => new Date().toISOString();
