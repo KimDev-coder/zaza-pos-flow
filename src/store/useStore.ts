@@ -1,7 +1,18 @@
 import { create } from "zustand";
 
-export type Category = "Plats" | "Grillades" | "Boissons" | "Accompagnements";
+export type Category = "Féculents" | "Viandes" | "Légumes" | "Boissons" | "Autres";
 export type PaymentMethod = "Cash" | "Mobile Money" | "Carte";
+export type Role = "Admin" | "Manager" | "Caissier";
+export type Permission = "dashboard" | "ventes" | "stock" | "achats" | "profil";
+
+export interface AppUser {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  avatar?: string;
+  permissions: Permission[];
+}
 
 export interface Product {
   id: string;
