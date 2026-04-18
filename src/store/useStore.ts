@@ -64,71 +64,72 @@ interface State {
   sales: Sale[];
   purchases: Purchase[];
   expenses: Expense[];
-  user: { name: string; role: string; email: string };
+  user: AppUser;
+  users: AppUser[];
+  catalog: { name: string; emoji: string }[];
   addProduct: (p: Omit<Product, "id">) => void;
   updateProduct: (id: string, p: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
   addSale: (items: SaleItem[], discount: number, payment: PaymentMethod) => void;
   addPurchase: (productId: string, qty: number, unitCost: number) => void;
   addExpense: (type: string, amount: number, description: string) => void;
+  updateUser: (u: Partial<AppUser>) => void;
+  updateUserPermissions: (id: string, perms: Permission[]) => void;
+  updateUserRole: (id: string, role: Role) => void;
 }
 
 const today = () => new Date().toISOString();
 
+// Catalogue rapide pour la vente — le vendeur définit le prix au moment de la vente
+const catalog = [
+  { name: "Ubugari bw'imyumbati", emoji: "🍞" },
+  { name: "Ubugari bw'isembe", emoji: "🌽" },
+  { name: "Umuceri w'amazi", emoji: "🍚" },
+  { name: "Umuceri w'ipilau", emoji: "🍛" },
+  { name: "Inyama y'inka", emoji: "🥩" },
+  { name: "Inyama y'inkoko", emoji: "🍗" },
+  { name: "Inyama y'ibitunguru", emoji: "🧅" },
+  { name: "Isombe", emoji: "🥬" },
+  { name: "Ikinono", emoji: "🍲" },
+  { name: "Ilengalenga", emoji: "🌿" },
+  { name: "Amafiriti", emoji: "🍟" },
+  { name: "Ibiraya", emoji: "🥔" },
+  { name: "Igitoke", emoji: "🍌" },
+  { name: "Ibiharage", emoji: "🫘" },
+  { name: "Ubushaza", emoji: "🌱" },
+];
+
+// Stock par défaut (matières premières)
 const seedProducts: Product[] = [
-  { id: "p1", name: "Riz au poulet", price: 5000, cost: 2800, stock: 24, minStock: 5, category: "Plats", emoji: "🍚" },
-  { id: "p2", name: "Poulet braisé", price: 8000, cost: 4500, stock: 12, minStock: 4, category: "Grillades", emoji: "🍗" },
-  { id: "p3", name: "Frites", price: 2500, cost: 900, stock: 40, minStock: 10, category: "Accompagnements", emoji: "🍟" },
-  { id: "p4", name: "Soda 50cl", price: 1500, cost: 700, stock: 3, minStock: 12, category: "Boissons", emoji: "🥤" },
-  { id: "p5", name: "Brochettes (x3)", price: 4000, cost: 2000, stock: 18, minStock: 6, category: "Grillades", emoji: "🍢" },
-  { id: "p6", name: "Eau minérale", price: 1000, cost: 400, stock: 50, minStock: 15, category: "Boissons", emoji: "💧" },
-  { id: "p7", name: "Salade fraîche", price: 3000, cost: 1200, stock: 8, minStock: 5, category: "Accompagnements", emoji: "🥗" },
-  { id: "p8", name: "Tilapia grillé", price: 9000, cost: 5000, stock: 6, minStock: 3, category: "Grillades", emoji: "🐟" },
+  { id: "p1", name: "Umuceri (Riz)", price: 3500, cost: 2800, stock: 50, minStock: 10, category: "Féculents", emoji: "🍚" },
+  { id: "p2", name: "Amavuta (Huile)", price: 5000, cost: 4200, stock: 20, minStock: 5, category: "Autres", emoji: "🫙" },
+  { id: "p3", name: "Amakara (Charbon - sac)", price: 150000, cost: 120000, stock: 4, minStock: 2, category: "Autres", emoji: "🪨" },
+  { id: "p4", name: "Ibiraya (Pommes de terre)", price: 2000, cost: 1500, stock: 10, minStock: 5, category: "Légumes", emoji: "🥔" },
+  { id: "p5", name: "Inyama y'inka (Viande)", price: 12000, cost: 9000, stock: 15, minStock: 5, category: "Viandes", emoji: "🥩" },
+  { id: "p6", name: "Inyama y'inkoko (Poulet)", price: 10000, cost: 7500, stock: 12, minStock: 4, category: "Viandes", emoji: "🍗" },
+  { id: "p7", name: "Igitoke (Bananes)", price: 1500, cost: 1000, stock: 25, minStock: 8, category: "Légumes", emoji: "🍌" },
+  { id: "p8", name: "Ibiharage (Haricots)", price: 2500, cost: 1800, stock: 30, minStock: 10, category: "Féculents", emoji: "🫘" },
+  { id: "p9", name: "Isombe (Manioc feuilles)", price: 1500, cost: 1000, stock: 8, minStock: 5, category: "Légumes", emoji: "🥬" },
+  { id: "p10", name: "Soda 50cl", price: 1500, cost: 700, stock: 24, minStock: 12, category: "Boissons", emoji: "🥤" },
+  { id: "p11", name: "Eau minérale", price: 1000, cost: 400, stock: 50, minStock: 15, category: "Boissons", emoji: "💧" },
 ];
 
-const seedSales: Sale[] = [
-  {
-    id: "s1",
-    items: [{ productId: "p1", name: "Riz au poulet", price: 5000, qty: 2 }],
-    total: 10000,
-    discount: 0,
-    payment: "Cash",
-    date: today(),
-  },
-  {
-    id: "s2",
-    items: [
-      { productId: "p2", name: "Poulet braisé", price: 8000, qty: 1 },
-      { productId: "p4", name: "Soda 50cl", price: 1500, qty: 2 },
-    ],
-    total: 11000,
-    discount: 0,
-    payment: "Mobile Money",
-    date: today(),
-  },
-  {
-    id: "s3",
-    items: [{ productId: "p5", name: "Brochettes (x3)", price: 4000, qty: 3 }],
-    total: 12000,
-    discount: 0,
-    payment: "Carte",
-    date: today(),
-  },
-];
-
-const seedExpenses: Expense[] = [
-  { id: "e1", type: "Électricité", amount: 15000, description: "Facture mensuelle", date: today() },
-  { id: "e2", type: "Transport", amount: 5000, description: "Livraison marché", date: today() },
+const defaultUsers: AppUser[] = [
+  { id: "u1", name: "Aïcha Niyongabo", email: "aicha@zazafood.bi", role: "Admin", permissions: ["dashboard", "ventes", "stock", "achats", "profil"] },
+  { id: "u2", name: "Jean Bosco", email: "jean@zazafood.bi", role: "Manager", permissions: ["dashboard", "ventes", "stock", "profil"] },
+  { id: "u3", name: "Claudine M.", email: "claudine@zazafood.bi", role: "Caissier", permissions: ["ventes", "profil"] },
 ];
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
 export const useStore = create<State>((set) => ({
   products: seedProducts,
-  sales: seedSales,
+  sales: [],
   purchases: [],
-  expenses: seedExpenses,
-  user: { name: "Aïcha Niyongabo", role: "Admin", email: "aicha@zazafood.bi" },
+  expenses: [],
+  user: defaultUsers[0],
+  users: defaultUsers,
+  catalog,
 
   addProduct: (p) => set((s) => ({ products: [...s.products, { ...p, id: uid() }] })),
   updateProduct: (id, p) =>
@@ -140,6 +141,7 @@ export const useStore = create<State>((set) => ({
       const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
       const total = Math.max(0, subtotal - discount);
       const sale: Sale = { id: uid(), items, total, discount, payment, date: today() };
+      // Ne décrémente le stock que si l'item correspond à un produit existant
       const products = s.products.map((p) => {
         const it = items.find((i) => i.productId === p.id);
         return it ? { ...p, stock: Math.max(0, p.stock - it.qty) } : p;
@@ -169,6 +171,18 @@ export const useStore = create<State>((set) => ({
   addExpense: (type, amount, description) =>
     set((s) => ({
       expenses: [{ id: uid(), type, amount, description, date: today() }, ...s.expenses],
+    })),
+
+  updateUser: (u) => set((s) => ({ user: { ...s.user, ...u }, users: s.users.map((x) => (x.id === s.user.id ? { ...x, ...u } : x)) })),
+  updateUserPermissions: (id, perms) =>
+    set((s) => ({
+      users: s.users.map((u) => (u.id === id ? { ...u, permissions: perms } : u)),
+      user: s.user.id === id ? { ...s.user, permissions: perms } : s.user,
+    })),
+  updateUserRole: (id, role) =>
+    set((s) => ({
+      users: s.users.map((u) => (u.id === id ? { ...u, role } : u)),
+      user: s.user.id === id ? { ...s.user, role } : s.user,
     })),
 }));
 
