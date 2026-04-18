@@ -187,6 +187,21 @@ export const useStore = create<State>((set) => ({
       users: s.users.map((u) => (u.id === id ? { ...u, role } : u)),
       user: s.user.id === id ? { ...s.user, role } : s.user,
     })),
+  loginAs: (id) =>
+    set((s) => {
+      const u = s.users.find((x) => x.id === id);
+      return u ? { user: u } : s;
+    }),
+  changePassword: (currentPwd, newPwd) => {
+    let ok = false;
+    set((s) => {
+      if (s.user.password !== currentPwd) return s;
+      ok = true;
+      const user = { ...s.user, password: newPwd };
+      return { user, users: s.users.map((u) => (u.id === user.id ? user : u)) };
+    });
+    return ok;
+  },
 }));
 
 export const formatBIF = (n: number) =>
