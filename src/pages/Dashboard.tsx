@@ -37,7 +37,7 @@ const Dashboard = () => {
   return (
     <AppShell>
       <PageHeader
-        title="Bonjour, Aïcha ✨"
+        title="Karibu Mabuja ✨"
         subtitle="Voici votre activité du jour"
       />
 
