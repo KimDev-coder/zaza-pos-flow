@@ -1,7 +1,7 @@
 import { AppShell, PageHeader } from "@/components/layout/AppShell";
-import { useStore, formatBIF, Permission, Role, AppUser } from "@/store/useStore";
+import { useStore, formatBIF, Permission, Role } from "@/store/useStore";
 import { AnimatePresence, motion } from "framer-motion";
-import { Bell, Globe, Moon, Shield, LogOut, ChevronRight, Sun, BadgeCheck, Camera, Users, X, Check } from "lucide-react";
+import { Bell, Globe, Moon, Shield, LogOut, ChevronRight, Sun, BadgeCheck, Camera, Users, X, Check, UserCog, Mail, Lock, User as UserIcon, Eye, EyeOff } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -15,12 +15,17 @@ const ALL_PERMS: { v: Permission; label: string }[] = [
 
 const ROLES: Role[] = ["Admin", "Manager", "Caissier"];
 
-const Profil = () => {
+interface ProfilProps {
+  onLogout?: () => void;
+}
+
+const Profil = ({ onLogout }: ProfilProps) => {
   const { user, sales, products, updateUser } = useStore();
   const totalSales = sales.reduce((s, x) => s + x.total, 0);
   const lowStock = products.filter((p) => p.stock <= p.minStock).length;
   const [dark, setDark] = useState(false);
   const [rolesOpen, setRolesOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -100,6 +105,11 @@ const Profil = () => {
         </motion.div>
       </div>
 
+      <h3 className="mt-7 mb-2 px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Mon compte</h3>
+      <div className="overflow-hidden rounded-2xl gradient-card shadow-soft ring-1 ring-border/50">
+        <Item icon={UserCog} label="Modifier le profil" right="Nom · Email · Mot de passe" onClick={() => setEditOpen(true)} last />
+      </div>
+
       <h3 className="mt-7 mb-2 px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Administration</h3>
       <div className="overflow-hidden rounded-2xl gradient-card shadow-soft ring-1 ring-border/50">
         <Item icon={Users} label="Rôles & permissions" right="Gérer" onClick={() => setRolesOpen(true)} last />
@@ -115,7 +125,7 @@ const Profil = () => {
 
       <motion.button
         whileTap={{ scale: 0.97 }}
-        onClick={() => toast("Déconnexion (UI seulement)")}
+        onClick={() => { toast.success("À bientôt 👋"); onLogout?.(); }}
         className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl border border-destructive/30 bg-destructive/5 py-3.5 text-sm font-bold text-destructive transition hover:bg-destructive/10"
       >
         <LogOut size={16} /> Déconnexion
@@ -124,6 +134,7 @@ const Profil = () => {
       <p className="mt-6 text-center text-xs text-muted-foreground">Zaza Food • Bwiza, Bujumbura</p>
 
       <RolesSheet open={rolesOpen} onClose={() => setRolesOpen(false)} />
+      <EditProfileSheet open={editOpen} onClose={() => setEditOpen(false)} />
     </AppShell>
   );
 };
@@ -252,6 +263,117 @@ const Toggle = ({ icon: Icon, label, value, onChange }: any) => (
         className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow-soft ${value ? "left-[22px]" : "left-0.5"}`} />
     </button>
   </div>
+);
+
+const EditProfileSheet = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
+  const { user, updateUser, changePassword } = useStore();
+  const [name, setName] = useState(user.name);
+  const [email, setEmail] = useState(user.email);
+  const [currentPwd, setCurrentPwd] = useState("");
+  const [newPwd, setNewPwd] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setName(user.name);
+      setEmail(user.email);
+      setCurrentPwd(""); setNewPwd(""); setConfirmPwd("");
+    }
+  }, [open, user]);
+
+  const save = () => {
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    if (!trimmedName) return toast.error("Le nom est requis");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) return toast.error("Email invalide");
+
+    let pwdChanged = false;
+    if (newPwd || confirmPwd || currentPwd) {
+      if (newPwd.length < 4) return toast.error("Mot de passe trop court (min 4)");
+      if (newPwd !== confirmPwd) return toast.error("Les mots de passe ne correspondent pas");
+      const ok = changePassword(currentPwd, newPwd);
+      if (!ok) return toast.error("Mot de passe actuel incorrect");
+      pwdChanged = true;
+    }
+
+    if (trimmedName !== user.name || trimmedEmail !== user.email) {
+      updateUser({ name: trimmedName, email: trimmedEmail });
+    }
+    toast.success(pwdChanged ? "Profil & mot de passe mis à jour" : "Profil mis à jour");
+    onClose();
+  };
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-foreground/40 backdrop-blur-md">
+          <motion.div
+            initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }}
+            transition={{ type: "spring", damping: 28, stiffness: 280 }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md rounded-t-[32px] bg-card p-5 shadow-pop max-h-[88vh] overflow-y-auto"
+          >
+            <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-border" />
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-extrabold tracking-tight" style={{ fontFamily: "Sora, sans-serif" }}>Modifier le profil</h2>
+                <p className="text-xs text-muted-foreground">Mettez à jour vos informations</p>
+              </div>
+              <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary"><X size={16} /></button>
+            </div>
+
+            <div className="space-y-3">
+              <Field icon={UserIcon} label="Nom complet">
+                <input value={name} onChange={(e) => setName(e.target.value)}
+                  className="w-full bg-transparent text-sm font-semibold outline-none" />
+              </Field>
+              <Field icon={Mail} label="Email">
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-transparent text-sm font-semibold outline-none" />
+              </Field>
+
+              <h3 className="mt-5 mb-1 px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Changer le mot de passe</h3>
+              <Field icon={Lock} label="Mot de passe actuel">
+                <input type={showPwd ? "text" : "password"} value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)}
+                  placeholder="••••" className="w-full bg-transparent text-sm font-semibold outline-none" />
+                <button type="button" onClick={() => setShowPwd((v) => !v)} className="text-muted-foreground">
+                  {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </Field>
+              <Field icon={Lock} label="Nouveau mot de passe">
+                <input type={showPwd ? "text" : "password"} value={newPwd} onChange={(e) => setNewPwd(e.target.value)}
+                  placeholder="Min. 4 caractères" className="w-full bg-transparent text-sm font-semibold outline-none" />
+              </Field>
+              <Field icon={Lock} label="Confirmer le mot de passe">
+                <input type={showPwd ? "text" : "password"} value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)}
+                  className="w-full bg-transparent text-sm font-semibold outline-none" />
+              </Field>
+            </div>
+
+            <motion.button
+              whileTap={{ scale: 0.97 }} onClick={save}
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl gradient-mesh py-3.5 text-sm font-extrabold tracking-tight text-primary-foreground shadow-glow"
+            >
+              <Check size={16} strokeWidth={3} /> Enregistrer
+            </motion.button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+const Field = ({ icon: Icon, label, children }: any) => (
+  <label className="block">
+    <span className="mb-1 block px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{label}</span>
+    <div className="flex items-center gap-2 rounded-2xl bg-secondary px-4 py-3 ring-1 ring-border/50 focus-within:ring-primary">
+      <Icon size={16} className="text-muted-foreground" />
+      {children}
+    </div>
+  </label>
 );
 
 export default Profil;

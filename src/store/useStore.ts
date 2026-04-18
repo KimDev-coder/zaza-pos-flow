@@ -9,6 +9,7 @@ export interface AppUser {
   id: string;
   name: string;
   email: string;
+  password: string;
   role: Role;
   avatar?: string;
   permissions: Permission[];
@@ -76,6 +77,8 @@ interface State {
   updateUser: (u: Partial<AppUser>) => void;
   updateUserPermissions: (id: string, perms: Permission[]) => void;
   updateUserRole: (id: string, role: Role) => void;
+  loginAs: (id: string) => void;
+  changePassword: (currentPwd: string, newPwd: string) => boolean;
 }
 
 const today = () => new Date().toISOString();
@@ -115,9 +118,9 @@ const seedProducts: Product[] = [
 ];
 
 const defaultUsers: AppUser[] = [
-  { id: "u1", name: "Aïcha Niyongabo", email: "aicha@zazafood.bi", role: "Admin", permissions: ["dashboard", "ventes", "stock", "achats", "profil"] },
-  { id: "u2", name: "Jean Bosco", email: "jean@zazafood.bi", role: "Manager", permissions: ["dashboard", "ventes", "stock", "profil"] },
-  { id: "u3", name: "Claudine M.", email: "claudine@zazafood.bi", role: "Caissier", permissions: ["ventes", "profil"] },
+  { id: "u1", name: "Admin Zaza", email: "zazafood@gmail.com", password: "1234", role: "Admin", permissions: ["dashboard", "ventes", "stock", "achats", "profil"] },
+  { id: "u2", name: "Jean Bosco", email: "jean@zazafood.bi", password: "1234", role: "Manager", permissions: ["dashboard", "ventes", "stock", "profil"] },
+  { id: "u3", name: "Claudine M.", email: "claudine@zazafood.bi", password: "1234", role: "Caissier", permissions: ["ventes", "profil"] },
 ];
 
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -184,6 +187,21 @@ export const useStore = create<State>((set) => ({
       users: s.users.map((u) => (u.id === id ? { ...u, role } : u)),
       user: s.user.id === id ? { ...s.user, role } : s.user,
     })),
+  loginAs: (id) =>
+    set((s) => {
+      const u = s.users.find((x) => x.id === id);
+      return u ? { user: u } : s;
+    }),
+  changePassword: (currentPwd, newPwd) => {
+    let ok = false;
+    set((s) => {
+      if (s.user.password !== currentPwd) return s;
+      ok = true;
+      const user = { ...s.user, password: newPwd };
+      return { user, users: s.users.map((u) => (u.id === user.id ? user : u)) };
+    });
+    return ok;
+  },
 }));
 
 export const formatBIF = (n: number) =>
