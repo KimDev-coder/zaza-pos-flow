@@ -13,10 +13,9 @@ const Achats = () => {
   const [pqty, setPqty] = useState(1);
   const [pcost, setPcost] = useState(0);
 
-  const [type, setType] = useState("Électricité");
+  const [type, setType] = useState("");
   const [amount, setAmount] = useState(0);
   const [desc, setDesc] = useState("");
-  const types = ["Électricité", "Eau", "Transport", "Salaire", "Loyer", "Autre"];
 
   const submitPurchase = () => {
     if (!pid || pqty <= 0 || pcost <= 0) return toast.error("Champs invalides");
@@ -25,10 +24,11 @@ const Achats = () => {
     setPqty(1); setPcost(0);
   };
   const submitExpense = () => {
+    if (!type.trim()) return toast.error("Type de dépense requis");
     if (amount <= 0) return toast.error("Montant invalide");
-    addExpense(type, amount, desc);
+    addExpense(type.trim(), amount, desc);
     toast.success("Dépense enregistrée");
-    setAmount(0); setDesc("");
+    setType(""); setAmount(0); setDesc("");
   };
 
   return (
@@ -94,14 +94,7 @@ const Achats = () => {
         <>
           <Card>
             <h3 className="mb-3 text-sm font-extrabold tracking-tight" style={{ fontFamily: "Sora, sans-serif" }}>Nouvelle dépense</h3>
-            <Field label="Type">
-              <div className="flex flex-wrap gap-1.5">
-                {types.map((t) => (
-                  <button key={t} onClick={() => setType(t)}
-                    className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${type === t ? "gradient-mesh text-primary-foreground shadow-glow" : "bg-secondary text-muted-foreground"}`}>{t}</button>
-                ))}
-              </div>
-            </Field>
+            <Field label="Type de dépense"><input value={type} onChange={(e) => setType(e.target.value)} placeholder="Ex: Électricité, transport..." className="input" /></Field>
             <div className="mt-3"><Field label="Montant (BIF)"><input type="number" min={0} value={amount || ""} onChange={(e) => setAmount(+e.target.value)} className="input" /></Field></div>
             <div className="mt-3"><Field label="Description"><input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Optionnel" className="input" /></Field></div>
             <Button onClick={submitExpense}><Plus size={14} strokeWidth={3} /> Ajouter la dépense</Button>

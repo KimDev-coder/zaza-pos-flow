@@ -5,8 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Search, Pencil, X, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-const cats: Category[] = ["Plats", "Grillades", "Boissons", "Accompagnements"];
-const emojis = ["🍚", "🍗", "🍟", "🥤", "🍢", "💧", "🥗", "🐟", "🍔", "🍕", "🌮", "🍰"];
+const cats: Category[] = ["Féculents", "Viandes", "Légumes", "Boissons", "Autres"];
+const emojis = ["🍚", "🍗", "🍟", "🥤", "🥩", "💧", "🥗", "🐟", "🥔", "🌽", "🍌", "🫘", "🥬", "🪨", "🫙", "🍞"];
 
 const Stock = () => {
   const { products, addProduct, updateProduct, deleteProduct } = useStore();
