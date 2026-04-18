@@ -1,7 +1,7 @@
 import { AppShell, PageHeader } from "@/components/layout/AppShell";
-import { useStore, formatBIF, Permission, Role, AppUser } from "@/store/useStore";
+import { useStore, formatBIF, Permission, Role } from "@/store/useStore";
 import { AnimatePresence, motion } from "framer-motion";
-import { Bell, Globe, Moon, Shield, LogOut, ChevronRight, Sun, BadgeCheck, Camera, Users, X, Check } from "lucide-react";
+import { Bell, Globe, Moon, Shield, LogOut, ChevronRight, Sun, BadgeCheck, Camera, Users, X, Check, UserCog, Mail, Lock, User as UserIcon, Eye, EyeOff } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -15,12 +15,17 @@ const ALL_PERMS: { v: Permission; label: string }[] = [
 
 const ROLES: Role[] = ["Admin", "Manager", "Caissier"];
 
-const Profil = () => {
+interface ProfilProps {
+  onLogout?: () => void;
+}
+
+const Profil = ({ onLogout }: ProfilProps) => {
   const { user, sales, products, updateUser } = useStore();
   const totalSales = sales.reduce((s, x) => s + x.total, 0);
   const lowStock = products.filter((p) => p.stock <= p.minStock).length;
   const [dark, setDark] = useState(false);
   const [rolesOpen, setRolesOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
