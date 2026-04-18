@@ -105,6 +105,11 @@ const Profil = ({ onLogout }: ProfilProps) => {
         </motion.div>
       </div>
 
+      <h3 className="mt-7 mb-2 px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Mon compte</h3>
+      <div className="overflow-hidden rounded-2xl gradient-card shadow-soft ring-1 ring-border/50">
+        <Item icon={UserCog} label="Modifier le profil" right="Nom · Email · Mot de passe" onClick={() => setEditOpen(true)} last />
+      </div>
+
       <h3 className="mt-7 mb-2 px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Administration</h3>
       <div className="overflow-hidden rounded-2xl gradient-card shadow-soft ring-1 ring-border/50">
         <Item icon={Users} label="Rôles & permissions" right="Gérer" onClick={() => setRolesOpen(true)} last />
@@ -120,7 +125,7 @@ const Profil = ({ onLogout }: ProfilProps) => {
 
       <motion.button
         whileTap={{ scale: 0.97 }}
-        onClick={() => toast("Déconnexion (UI seulement)")}
+        onClick={() => { toast.success("À bientôt 👋"); onLogout?.(); }}
         className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl border border-destructive/30 bg-destructive/5 py-3.5 text-sm font-bold text-destructive transition hover:bg-destructive/10"
       >
         <LogOut size={16} /> Déconnexion
@@ -129,6 +134,7 @@ const Profil = ({ onLogout }: ProfilProps) => {
       <p className="mt-6 text-center text-xs text-muted-foreground">Zaza Food • Bwiza, Bujumbura</p>
 
       <RolesSheet open={rolesOpen} onClose={() => setRolesOpen(false)} />
+      <EditProfileSheet open={editOpen} onClose={() => setEditOpen(false)} />
     </AppShell>
   );
 };
