@@ -60,16 +60,28 @@ export interface Expense {
   date: string;
 }
 
+export interface StockMovement {
+  id: string;
+  productId: string;
+  productName: string;
+  type: "ajout" | "vente" | "achat" | "ajustement" | "suppression";
+  qty: number;        // positif = entrée, négatif = sortie
+  stockAfter: number;
+  note?: string;
+  date: string;
+}
+
 interface State {
   products: Product[];
   sales: Sale[];
   purchases: Purchase[];
   expenses: Expense[];
+  movements: StockMovement[];
   user: AppUser;
   users: AppUser[];
   catalog: { name: string; emoji: string }[];
   addProduct: (p: Omit<Product, "id">) => void;
-  updateProduct: (id: string, p: Partial<Product>) => void;
+  updateProduct: (id: string, p: Partial<Product>, note?: string) => void;
   deleteProduct: (id: string) => void;
   addSale: (items: SaleItem[], discount: number, payment: PaymentMethod) => void;
   addPurchase: (productId: string, qty: number, unitCost: number) => void;
