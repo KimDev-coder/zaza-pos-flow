@@ -59,10 +59,7 @@ const Achats = () => {
           <Card>
             <h3 className="mb-3 text-sm font-extrabold tracking-tight" style={{ fontFamily: "Sora, sans-serif" }}>Nouvel achat</h3>
             <Field label="Produit">
-              <select value={pid} onChange={(e) => setPid(e.target.value)} className="input">
-                <option value="">-- Choisir un produit --</option>
-                {products.map((p) => <option key={p.id} value={p.id}>{p.emoji} {p.name}</option>)}
-              </select>
+              <input value={pid} onChange={(e) => setPid(e.target.value)} placeholder="Ex: Riz, Huile, Charbon..." className="input" />
             </Field>
             <div className="mt-3 grid grid-cols-2 gap-3">
               <Field label="Quantité"><input type="number" min={1} value={pqty} onChange={(e) => setPqty(e.target.value === "" ? "" : +e.target.value)} placeholder="Ex: 10" className="input" /></Field>
