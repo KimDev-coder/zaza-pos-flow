@@ -1,0 +1,23 @@
+{
+  "name": "Zaza Food",
+  "short_name": "Zaza Food",
+  "description": "Application de gestion pour restaurant Zaza Food — Bujumbura, Bwiza",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#008060",
+  "theme_color": "#008060",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
