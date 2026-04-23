@@ -190,7 +190,7 @@ const ProductForm = ({ open, product, onClose, onSave, onDelete }: any) => {
               whileTap={{ scale: 0.97 }}
               onClick={() => {
                 if (!name.trim()) return toast.error("Nom requis");
-                onSave({ name, price, cost, stock, minStock, category, emoji });
+                onSave({ name, price: +price || 0, cost: +cost || 0, stock: +stock || 0, minStock: +minStock || 0, category, emoji });
               }}
               className="flex-1 rounded-2xl gradient-mesh py-3.5 text-sm font-extrabold tracking-tight text-primary-foreground shadow-glow"
             >
