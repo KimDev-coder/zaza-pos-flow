@@ -19,9 +19,9 @@ const Achats = () => {
 
   const submitPurchase = () => {
     const q = Number(pqty), c = Number(pcost);
-    if (!pid) return toast.error("Sélectionnez un produit");
+    if (!pid.trim()) return toast.error("Saisissez un produit");
     if (q <= 0 || c <= 0) return toast.error("Champs invalides");
-    addPurchase(pid, q, c);
+    addPurchase(pid.trim(), q, c);
     toast.success("Achat enregistré");
     setPid(""); setPqty(""); setPcost("");
   };
