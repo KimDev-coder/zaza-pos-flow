@@ -84,7 +84,7 @@ interface State {
   updateProduct: (id: string, p: Partial<Product>, note?: string) => void;
   deleteProduct: (id: string) => void;
   addSale: (items: SaleItem[], discount: number, payment: PaymentMethod) => void;
-  addPurchase: (productId: string, qty: number, unitCost: number) => void;
+  addPurchase: (productName: string, qty: number, unitCost: number) => void;
   addExpense: (type: string, amount: number, description: string) => void;
   updateUser: (u: Partial<AppUser>) => void;
   updateUserPermissions: (id: string, perms: Permission[]) => void;
@@ -204,13 +204,28 @@ export const useStore = create<State>((set) => ({
       return { sales: [sale, ...s.sales], products, movements: [...newMoves, ...s.movements] };
     }),
 
-  addPurchase: (productId, qty, unitCost) =>
+  addPurchase: (productName, qty, unitCost) =>
     set((s) => {
-      const product = s.products.find((p) => p.id === productId);
-      if (!product) return s;
+      const trimmed = productName.trim();
+      if (!trimmed) return s;
+      let product = s.products.find((p) => p.name.toLowerCase() === trimmed.toLowerCase());
+      let products = s.products;
+      if (!product) {
+        product = {
+          id: uid(),
+          name: trimmed,
+          price: 0,
+          stock: 0,
+          minStock: 0,
+          category: "Autres",
+          emoji: "📦",
+          cost: unitCost,
+        };
+        products = [product, ...s.products];
+      }
       const purchase: Purchase = {
         id: uid(),
-        productId,
+        productId: product.id,
         productName: product.name,
         qty,
         unitCost,
@@ -218,12 +233,12 @@ export const useStore = create<State>((set) => ({
         date: today(),
       };
       const stockAfter = product.stock + qty;
-      const products = s.products.map((p) =>
-        p.id === productId ? { ...p, stock: stockAfter } : p
+      products = products.map((p) =>
+        p.id === product!.id ? { ...p, stock: stockAfter } : p
       );
       const mv: StockMovement = {
         id: uid(),
-        productId,
+        productId: product.id,
         productName: product.name,
         type: "achat",
         qty,
