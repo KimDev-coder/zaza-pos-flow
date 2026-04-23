@@ -130,26 +130,78 @@ export const useStore = create<State>((set) => ({
   sales: [],
   purchases: [],
   expenses: [],
+  movements: [],
   user: defaultUsers[0],
   users: defaultUsers,
   catalog,
 
-  addProduct: (p) => set((s) => ({ products: [...s.products, { ...p, id: uid() }] })),
-  updateProduct: (id, p) =>
-    set((s) => ({ products: s.products.map((x) => (x.id === id ? { ...x, ...p } : x)) })),
-  deleteProduct: (id) => set((s) => ({ products: s.products.filter((x) => x.id !== id) })),
+  addProduct: (p) =>
+    set((s) => {
+      const newP: Product = { ...p, id: uid() };
+      const mv: StockMovement = {
+        id: uid(),
+        productId: newP.id,
+        productName: newP.name,
+        type: "ajout",
+        qty: newP.stock,
+        stockAfter: newP.stock,
+        note: "Création produit",
+        date: today(),
+      };
+      return { products: [...s.products, newP], movements: [mv, ...s.movements] };
+    }),
+  updateProduct: (id, p, note) =>
+    set((s) => {
+      const prev = s.products.find((x) => x.id === id);
+      const products = s.products.map((x) => (x.id === id ? { ...x, ...p } : x));
+      const next = products.find((x) => x.id === id);
+      const movements = [...s.movements];
+      if (prev && next && p.stock !== undefined && next.stock !== prev.stock) {
+        movements.unshift({
+          id: uid(),
+          productId: id,
+          productName: next.name,
+          type: "ajustement",
+          qty: next.stock - prev.stock,
+          stockAfter: next.stock,
+          note: note || "Ajustement manuel",
+          date: today(),
+        });
+      }
+      return { products, movements };
+    }),
+  deleteProduct: (id) =>
+    set((s) => {
+      const prev = s.products.find((x) => x.id === id);
+      const movements = prev
+        ? [{ id: uid(), productId: id, productName: prev.name, type: "suppression" as const, qty: -prev.stock, stockAfter: 0, note: "Produit supprimé", date: today() }, ...s.movements]
+        : s.movements;
+      return { products: s.products.filter((x) => x.id !== id), movements };
+    }),
 
   addSale: (items, discount, payment) =>
     set((s) => {
       const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
       const total = Math.max(0, subtotal - discount);
       const sale: Sale = { id: uid(), items, total, discount, payment, date: today() };
-      // Ne décrémente le stock que si l'item correspond à un produit existant
+      const newMoves: StockMovement[] = [];
       const products = s.products.map((p) => {
         const it = items.find((i) => i.productId === p.id);
-        return it ? { ...p, stock: Math.max(0, p.stock - it.qty) } : p;
+        if (!it) return p;
+        const stockAfter = Math.max(0, p.stock - it.qty);
+        newMoves.push({
+          id: uid(),
+          productId: p.id,
+          productName: p.name,
+          type: "vente",
+          qty: -it.qty,
+          stockAfter,
+          note: `Vente #${sale.id}`,
+          date: sale.date,
+        });
+        return { ...p, stock: stockAfter };
       });
-      return { sales: [sale, ...s.sales], products };
+      return { sales: [sale, ...s.sales], products, movements: [...newMoves, ...s.movements] };
     }),
 
   addPurchase: (productId, qty, unitCost) =>
@@ -165,10 +217,21 @@ export const useStore = create<State>((set) => ({
         total: qty * unitCost,
         date: today(),
       };
+      const stockAfter = product.stock + qty;
       const products = s.products.map((p) =>
-        p.id === productId ? { ...p, stock: p.stock + qty } : p
+        p.id === productId ? { ...p, stock: stockAfter } : p
       );
-      return { purchases: [purchase, ...s.purchases], products };
+      const mv: StockMovement = {
+        id: uid(),
+        productId,
+        productName: product.name,
+        type: "achat",
+        qty,
+        stockAfter,
+        note: `Achat ${formatBIF(qty * unitCost)}`,
+        date: purchase.date,
+      };
+      return { purchases: [purchase, ...s.purchases], products, movements: [mv, ...s.movements] };
     }),
 
   addExpense: (type, amount, description) =>
