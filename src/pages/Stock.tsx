@@ -155,10 +155,10 @@ const ProductForm = ({ open, product, onClose, onSave, onDelete }: any) => {
             <Field label="Nom"><input value={name} onChange={(e) => setName(e.target.value)} className="input" /></Field>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Prix vente (BIF)"><input type="number" value={price} onChange={(e) => setPrice(+e.target.value)} className="input" /></Field>
-              <Field label="Coût (BIF)"><input type="number" value={cost} onChange={(e) => setCost(+e.target.value)} className="input" /></Field>
-              <Field label="Stock"><input type="number" value={stock} onChange={(e) => setStock(+e.target.value)} className="input" /></Field>
-              <Field label="Stock min"><input type="number" value={minStock} onChange={(e) => setMinStock(+e.target.value)} className="input" /></Field>
+              <Field label="Prix vente (BIF)"><input type="number" placeholder="0" value={price} onChange={(e) => setPrice(e.target.value === "" ? "" : +e.target.value)} className="input" /></Field>
+              <Field label="Coût (BIF)"><input type="number" placeholder="0" value={cost} onChange={(e) => setCost(e.target.value === "" ? "" : +e.target.value)} className="input" /></Field>
+              <Field label="Stock (ex: 30)"><input type="number" placeholder="0" value={stock} onChange={(e) => setStock(e.target.value === "" ? "" : +e.target.value)} className="input" /></Field>
+              <Field label="Alerte min (ex: 5)"><input type="number" placeholder="0" value={minStock} onChange={(e) => setMinStock(e.target.value === "" ? "" : +e.target.value)} className="input" /></Field>
             </div>
 
             <Field label="Catégorie">
