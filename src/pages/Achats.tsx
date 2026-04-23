@@ -9,26 +9,29 @@ const Achats = () => {
   const { products, purchases, expenses, addPurchase, addExpense } = useStore();
   const [tab, setTab] = useState<"achats" | "depenses">("achats");
 
-  const [pid, setPid] = useState(products[0]?.id || "");
-  const [pqty, setPqty] = useState(1);
-  const [pcost, setPcost] = useState(0);
+  const [pid, setPid] = useState("");
+  const [pqty, setPqty] = useState<number | "">("");
+  const [pcost, setPcost] = useState<number | "">("");
 
   const [type, setType] = useState("");
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState<number | "">("");
   const [desc, setDesc] = useState("");
 
   const submitPurchase = () => {
-    if (!pid || pqty <= 0 || pcost <= 0) return toast.error("Champs invalides");
-    addPurchase(pid, pqty, pcost);
+    const q = Number(pqty), c = Number(pcost);
+    if (!pid) return toast.error("Sélectionnez un produit");
+    if (q <= 0 || c <= 0) return toast.error("Champs invalides");
+    addPurchase(pid, q, c);
     toast.success("Achat enregistré");
-    setPqty(1); setPcost(0);
+    setPid(""); setPqty(""); setPcost("");
   };
   const submitExpense = () => {
+    const a = Number(amount);
     if (!type.trim()) return toast.error("Type de dépense requis");
-    if (amount <= 0) return toast.error("Montant invalide");
-    addExpense(type.trim(), amount, desc);
+    if (a <= 0) return toast.error("Montant invalide");
+    addExpense(type.trim(), a, desc);
     toast.success("Dépense enregistrée");
-    setType(""); setAmount(0); setDesc("");
+    setType(""); setAmount(""); setDesc("");
   };
 
   return (
@@ -57,20 +60,21 @@ const Achats = () => {
             <h3 className="mb-3 text-sm font-extrabold tracking-tight" style={{ fontFamily: "Sora, sans-serif" }}>Nouvel achat</h3>
             <Field label="Produit">
               <select value={pid} onChange={(e) => setPid(e.target.value)} className="input">
+                <option value="">-- Choisir un produit --</option>
                 {products.map((p) => <option key={p.id} value={p.id}>{p.emoji} {p.name}</option>)}
               </select>
             </Field>
             <div className="mt-3 grid grid-cols-2 gap-3">
-              <Field label="Quantité"><input type="number" min={1} value={pqty} onChange={(e) => setPqty(+e.target.value)} className="input" /></Field>
-              <Field label="Coût unitaire"><input type="number" min={0} value={pcost || ""} onChange={(e) => setPcost(+e.target.value)} className="input" /></Field>
+              <Field label="Quantité"><input type="number" min={1} value={pqty} onChange={(e) => setPqty(e.target.value === "" ? "" : +e.target.value)} placeholder="Ex: 10" className="input" /></Field>
+              <Field label="Coût unitaire"><input type="number" min={0} value={pcost} onChange={(e) => setPcost(e.target.value === "" ? "" : +e.target.value)} placeholder="Ex: 5000" className="input" /></Field>
             </div>
             <motion.div
-              key={pqty * pcost}
+              key={Number(pqty) * Number(pcost)}
               initial={{ scale: 0.95 }} animate={{ scale: 1 }}
               className="mt-3 flex items-center justify-between rounded-2xl bg-accent px-4 py-3"
             >
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Total</span>
-              <span className="text-lg font-extrabold gradient-text" style={{ fontFamily: "Sora, sans-serif" }}>{formatBIF(pqty * pcost)}</span>
+              <span className="text-lg font-extrabold gradient-text" style={{ fontFamily: "Sora, sans-serif" }}>{formatBIF(Number(pqty) * Number(pcost))}</span>
             </motion.div>
             <Button onClick={submitPurchase}><Plus size={14} strokeWidth={3} /> Ajouter l'achat</Button>
           </Card>
@@ -95,7 +99,7 @@ const Achats = () => {
           <Card>
             <h3 className="mb-3 text-sm font-extrabold tracking-tight" style={{ fontFamily: "Sora, sans-serif" }}>Nouvelle dépense</h3>
             <Field label="Type de dépense"><input value={type} onChange={(e) => setType(e.target.value)} placeholder="Ex: Électricité, transport..." className="input" /></Field>
-            <div className="mt-3"><Field label="Montant (BIF)"><input type="number" min={0} value={amount || ""} onChange={(e) => setAmount(+e.target.value)} className="input" /></Field></div>
+            <div className="mt-3"><Field label="Montant (BIF)"><input type="number" min={0} value={amount} onChange={(e) => setAmount(e.target.value === "" ? "" : +e.target.value)} placeholder="Ex: 10000" className="input" /></Field></div>
             <div className="mt-3"><Field label="Description"><input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Optionnel" className="input" /></Field></div>
             <Button onClick={submitExpense}><Plus size={14} strokeWidth={3} /> Ajouter la dépense</Button>
           </Card>
