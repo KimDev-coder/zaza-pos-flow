@@ -122,12 +122,12 @@ const Stock = () => {
 
 const ProductForm = ({ open, product, onClose, onSave, onDelete }: any) => {
   const [name, setName] = useState(product?.name || "");
-  const [price, setPrice] = useState(product?.price || 0);
-  const [cost, setCost] = useState(product?.cost || 0);
-  const [stock, setStock] = useState(product?.stock || 0);
-  const [minStock, setMinStock] = useState(product?.minStock || 5);
-  const [category, setCategory] = useState<Category>(product?.category || "Plats");
-  const [emoji, setEmoji] = useState(product?.emoji || "🍽️");
+  const [price, setPrice] = useState<number | "">(product?.price ?? "");
+  const [cost, setCost] = useState<number | "">(product?.cost ?? "");
+  const [stock, setStock] = useState<number | "">(product?.stock ?? "");
+  const [minStock, setMinStock] = useState<number | "">(product?.minStock ?? "");
+  const [category, setCategory] = useState<Category>(product?.category || "Autres");
+  const [emoji, setEmoji] = useState(product?.emoji || "📦");
 
   if (!open) return null;
 
