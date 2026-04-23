@@ -102,20 +102,8 @@ const catalog = [
   { name: "Ubushaza", emoji: "🌱" },
 ];
 
-// Stock par défaut (matières premières)
-const seedProducts: Product[] = [
-  { id: "p1", name: "Umuceri (Riz)", price: 3500, cost: 2800, stock: 50, minStock: 10, category: "Féculents", emoji: "🍚" },
-  { id: "p2", name: "Amavuta (Huile)", price: 5000, cost: 4200, stock: 20, minStock: 5, category: "Autres", emoji: "🫙" },
-  { id: "p3", name: "Amakara (Charbon - sac)", price: 150000, cost: 120000, stock: 4, minStock: 2, category: "Autres", emoji: "🪨" },
-  { id: "p4", name: "Ibiraya (Pommes de terre)", price: 2000, cost: 1500, stock: 10, minStock: 5, category: "Légumes", emoji: "🥔" },
-  { id: "p5", name: "Inyama y'inka (Viande)", price: 12000, cost: 9000, stock: 15, minStock: 5, category: "Viandes", emoji: "🥩" },
-  { id: "p6", name: "Inyama y'inkoko (Poulet)", price: 10000, cost: 7500, stock: 12, minStock: 4, category: "Viandes", emoji: "🍗" },
-  { id: "p7", name: "Igitoke (Bananes)", price: 1500, cost: 1000, stock: 25, minStock: 8, category: "Légumes", emoji: "🍌" },
-  { id: "p8", name: "Ibiharage (Haricots)", price: 2500, cost: 1800, stock: 30, minStock: 10, category: "Féculents", emoji: "🫘" },
-  { id: "p9", name: "Isombe (Manioc feuilles)", price: 1500, cost: 1000, stock: 8, minStock: 5, category: "Légumes", emoji: "🥬" },
-  { id: "p10", name: "Soda 50cl", price: 1500, cost: 700, stock: 24, minStock: 12, category: "Boissons", emoji: "🥤" },
-  { id: "p11", name: "Eau minérale", price: 1000, cost: 400, stock: 50, minStock: 15, category: "Boissons", emoji: "💧" },
-];
+// Stock vide par défaut — l'utilisateur ajoute manuellement ses produits
+const seedProducts: Product[] = [];
 
 const defaultUsers: AppUser[] = [
   { id: "u1", name: "Admin Zaza", email: "zazafood@gmail.com", password: "1234", role: "Admin", permissions: ["dashboard", "ventes", "stock", "achats", "profil"] },

@@ -122,12 +122,12 @@ const Stock = () => {
 
 const ProductForm = ({ open, product, onClose, onSave, onDelete }: any) => {
   const [name, setName] = useState(product?.name || "");
-  const [price, setPrice] = useState(product?.price || 0);
-  const [cost, setCost] = useState(product?.cost || 0);
-  const [stock, setStock] = useState(product?.stock || 0);
-  const [minStock, setMinStock] = useState(product?.minStock || 5);
-  const [category, setCategory] = useState<Category>(product?.category || "Plats");
-  const [emoji, setEmoji] = useState(product?.emoji || "🍽️");
+  const [price, setPrice] = useState<number | "">(product?.price ?? "");
+  const [cost, setCost] = useState<number | "">(product?.cost ?? "");
+  const [stock, setStock] = useState<number | "">(product?.stock ?? "");
+  const [minStock, setMinStock] = useState<number | "">(product?.minStock ?? "");
+  const [category, setCategory] = useState<Category>(product?.category || "Autres");
+  const [emoji, setEmoji] = useState(product?.emoji || "📦");
 
   if (!open) return null;
 
@@ -155,10 +155,10 @@ const ProductForm = ({ open, product, onClose, onSave, onDelete }: any) => {
             <Field label="Nom"><input value={name} onChange={(e) => setName(e.target.value)} className="input" /></Field>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Prix vente (BIF)"><input type="number" value={price} onChange={(e) => setPrice(+e.target.value)} className="input" /></Field>
-              <Field label="Coût (BIF)"><input type="number" value={cost} onChange={(e) => setCost(+e.target.value)} className="input" /></Field>
-              <Field label="Stock"><input type="number" value={stock} onChange={(e) => setStock(+e.target.value)} className="input" /></Field>
-              <Field label="Stock min"><input type="number" value={minStock} onChange={(e) => setMinStock(+e.target.value)} className="input" /></Field>
+              <Field label="Prix vente (BIF)"><input type="number" placeholder="0" value={price} onChange={(e) => setPrice(e.target.value === "" ? "" : +e.target.value)} className="input" /></Field>
+              <Field label="Coût (BIF)"><input type="number" placeholder="0" value={cost} onChange={(e) => setCost(e.target.value === "" ? "" : +e.target.value)} className="input" /></Field>
+              <Field label="Stock (ex: 30)"><input type="number" placeholder="0" value={stock} onChange={(e) => setStock(e.target.value === "" ? "" : +e.target.value)} className="input" /></Field>
+              <Field label="Alerte min (ex: 5)"><input type="number" placeholder="0" value={minStock} onChange={(e) => setMinStock(e.target.value === "" ? "" : +e.target.value)} className="input" /></Field>
             </div>
 
             <Field label="Catégorie">
@@ -190,7 +190,7 @@ const ProductForm = ({ open, product, onClose, onSave, onDelete }: any) => {
               whileTap={{ scale: 0.97 }}
               onClick={() => {
                 if (!name.trim()) return toast.error("Nom requis");
-                onSave({ name, price, cost, stock, minStock, category, emoji });
+                onSave({ name, price: +price || 0, cost: +cost || 0, stock: +stock || 0, minStock: +minStock || 0, category, emoji });
               }}
               className="flex-1 rounded-2xl gradient-mesh py-3.5 text-sm font-extrabold tracking-tight text-primary-foreground shadow-glow"
             >
